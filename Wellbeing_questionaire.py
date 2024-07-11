@@ -180,6 +180,13 @@ class Questionnaire:
             'properties': self.properties
         }
 
+    def flatten(self):
+        new_dict = self.__dict__
+        prop = new_dict.pop('properties')
+        new_dict.update(prop)
+        return new_dict
+
+
     def undef_to_default(self):
         for key, value in self.properties.items():
             if value == 'undefined':
@@ -203,7 +210,7 @@ class Questionnaire:
         self.properties['medical_prolapse_symptoms'] = (
                 self.properties['medical_prolapse_1'] + self.properties['medical_prolapse_2']
                 + self.properties['medical_prolapse_3'])
-        self.properties['sex_result'] = self.calc_sex_result()
+        #self.properties['sex_result'] = self.calc_sex_result()
 
     def calc_sex_result(self):
         if self.properties['sexuality_1'] == 'undefined':

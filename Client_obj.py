@@ -11,3 +11,4 @@ class Client:
             self.quests = quests
         else:
             self.quests = [None]*len(RANGES)
+

@@ -4,29 +4,15 @@ from Wellbeing_questionaire import Questionnaire, KeyProperties
 from Client_obj import RANGES
 
 
-def load_period(from_date, to_date):
-    mputils = MixpanelUtils('e0d9beac86a83795e8e7bd8608ae9e1b', token="64dbf22bfc3728f730b4895b62573650")
-    selector = 'defined (properties["$firmware"])'
-    parameters = {'selector': selector}
-
-    query = '''function main() {
-                        return Events({
-                            from_date: '%s',
-                            to_date: '%s',
-                            event_selectors:[{event:'Pelvic Assessment Passed'}]})
-                            .sortAsc('distinct_id');}''' % (from_date, to_date)
-    # then pass it to the function
-    results = mputils.query_jql(query)
-    return results
-
-
 # input : raw data from mixpanel
 # output : dict of clients
 
-
 def parse_data(data):
     client_dict = {}
+    count = 0
     for i in range(len(data)):
+        count += 1
+        print(count)
         if not data[i].get('distinct_id') in client_dict:
             client = Client(data[i].get('distinct_id'), [])
         else:
@@ -39,7 +25,7 @@ def parse_data(data):
 
 
 def identify_quest_and_update_client(quest: Questionnaire, client: Client):
-    game_sessions = quest.properties['total_game_sessions']
+    game_sessions = quest.properties.get('total_game_sessions', 0)
     for i in range(len(RANGES)):
         needs_replace = client.quests[i] is None or client.quests[i].properties['total_game_sessions'] < quest.properties['total_game_sessions']
         if game_sessions in RANGES[i] and needs_replace:
@@ -58,7 +44,3 @@ def parse_quest(one_line_data: dict):
                          one_line_data['sampling_factor'], one_line_data['dataset'], new_properties)
 
 
-# print(load_period("2022-07-22", "2022-07-22")[0])
-raw_data = load_period("2024-07-09", "2024-07-09")
-client_dict = parse_data(raw_data)
-print(len(client_dict))
