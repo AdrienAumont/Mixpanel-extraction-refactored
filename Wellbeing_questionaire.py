@@ -87,18 +87,12 @@ class Questionnaire:
     def __init__(self,
                  name: str = 'Pelvic Assessment Passed',
                  distinct_id: str = '',
-                 labels: list = None,
                  time: int = 0,
-                 sampling_factor: int = 1,
-                 dataset: str = '$mixpanel',
                  properties: dict = None):
 
         self.name = name
         self.distinct_id = distinct_id
-        self.labels = labels if labels is not None else []
         self.time = time
-        self.sampling_factor = sampling_factor
-        self.dataset = dataset
         self.properties = properties if properties else {}
 
         # Define default values for properties based on previous code
@@ -186,7 +180,6 @@ class Questionnaire:
         new_dict.update(prop)
         return new_dict
 
-
     def undef_to_default(self):
         for key, value in self.properties.items():
             if value == 'undefined':
@@ -210,26 +203,18 @@ class Questionnaire:
         self.properties['medical_prolapse_symptoms'] = (
                 self.properties['medical_prolapse_1'] + self.properties['medical_prolapse_2']
                 + self.properties['medical_prolapse_3'])
-        #self.properties['sex_result'] = self.calc_sex_result()
+        self.properties['sex_result'] = self.calc_sex_result()
 
     def calc_sex_result(self):
+        values = 0
+        divisor = 0
         if self.properties['sexuality_1'] == 'undefined':
             sex_score = 'undefined'
         else:
-            if self.properties['sexuality_2'] == 'undefined':
-                sex_2_answer = 0
-                sex_2_value = 0
-            else:
-                sex_2_answer = 1
-                sex_2_value = self.properties['sexuality_2']
-            if self.properties['sexuality_3'] == 'undefined':
-                sex_3_answer = 0
-                sex_3_value = 0
-            else:
-                sex_3_answer = 1
-                sex_3_value = self.properties['sexuality_3']
-
-            sex_score = (1 - (
-                    self.properties['sexuality_1'] + sex_2_value + sex_3_value + self.properties['sexuality_4'])
-                         / (6 + sex_2_answer * 3 + sex_3_answer * 3))
+            for key in self.properties:
+                if key.startswith('sexuality_'):
+                    if type(self.properties[key]) is int:
+                        values += self.properties[key]
+                        divisor += 3
+            sex_score = 1 - values/divisor
         return sex_score

@@ -2,6 +2,7 @@ import Extract
 import pandas as pd
 import Data_preProcessing as dapa
 from Wellbeing_questionaire import KeyProperties
+from Analysis import calc_stats
 
 
 def main():

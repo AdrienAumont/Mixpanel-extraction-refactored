@@ -9,10 +9,7 @@ from Client_obj import RANGES
 
 def parse_data(data):
     client_dict = {}
-    count = 0
     for i in range(len(data)):
-        count += 1
-        print(count)
         if not data[i].get('distinct_id') in client_dict:
             client = Client(data[i].get('distinct_id'), [])
         else:
@@ -31,7 +28,7 @@ def identify_quest_and_update_client(quest: Questionnaire, client: Client):
         if game_sessions in RANGES[i] and needs_replace:
             client.quests[i] = quest
             if i > 1 and client.quests[0]:
-                client.quests[i].properties['days_since_PA1'] = (client.quests[i].time - client.quests[0].time) / 86400
+                client.delta_time_i(i)
 
 
 def parse_quest(one_line_data: dict):
@@ -39,8 +36,6 @@ def parse_quest(one_line_data: dict):
     for key in KeyProperties:
         if key.value in one_line_data['properties']:
             new_properties[key.value] = one_line_data['properties'][key.value]
-    return Questionnaire(one_line_data['name'], one_line_data['distinct_id'],
-                         one_line_data['labels'], one_line_data['time'],
-                         one_line_data['sampling_factor'], one_line_data['dataset'], new_properties)
+    return Questionnaire(one_line_data['name'], one_line_data['distinct_id'], one_line_data['time'], new_properties)
 
 
