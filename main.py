@@ -1,26 +1,31 @@
 import Extract
 import pandas as pd
 import Data_preProcessing as dapa
+import copy
 from Wellbeing_questionaire import KeyProperties
 from Analysis import calc_stats
 
 
 def main():
-    Extract.fetch_and_store_data("Pelvic Assessment Passed", "2022-04-22", "2022-04-22", "raw_data")
-    raw_data = Extract.get_data_from_file("raw_data", '2022-04-22', '2022-04-22')
-    pre_processed_data = to_list_of_dict(raw_data)
-    write_to_csv(pre_processed_data)
+    Extract.fetch_and_store_data("Pelvic Assessment Passed", "2022-04-22", "2022-05-24", "raw_data")
+    raw_data = Extract.get_data_from_file("raw_data", '2022-04-22', '2022-05-24')
+    list_of_clients = dapa.parse_data(raw_data)
+    pre_processed_data = to_list_of_dict(list_of_clients.copy())
+    write_to_csv(pre_processed_data, 'output.csv')
+    analysis = calc_stats(list_of_clients)
+    analysis_list = dict_to_list_of_tuples(analysis)
+    write_to_csv(analysis_list, 'analysis.csv')
 
 
-def to_list_of_dict(raw_data):
-    client_dict = dapa.parse_data(raw_data)
-    list_of_clients = client_dict.values()
+def to_list_of_dict(original_list):
+    list_of_clients = original_list.copy()
     data = []
     for client in list_of_clients:
-        single_row = {}
-        for i in range(len(client.quests)):
-            if client.quests[i]:
-                flat = client.quests[i].flatten()
+        client_cpy = copy.deepcopy(client)
+        single_row = {"UI/NON UI": client.ui}
+        for i in range(len(client_cpy.quests)):
+            if client_cpy.quests[i]:
+                flat = client_cpy.quests[i].flatten()
                 new_dict = {f"{key}_PA{i + 1}": value for key, value in flat.items()}
             else:
                 new_dict = {f"{key.value}_PA{i + 1}": '' for key in KeyProperties}
@@ -29,12 +34,21 @@ def to_list_of_dict(raw_data):
     return data
 
 
-def write_to_csv(pre_processed_data):
+def dict_to_list_of_tuples(data):
+    if not isinstance(data, dict):
+        raise ValueError("Data must be a dictionary.")
+
+    # Convert the dictionary to a list of tuples
+    list_of_tuples = list(data.items())
+    return list_of_tuples
+
+
+def write_to_csv(pre_processed_data, name):
     df = pd.DataFrame(pre_processed_data)
     # Write DataFrame to CSV
-    df.to_csv('output.csv', index=False)
+    df.to_csv(name, index=False)
 
-    print("CSV file created successfully.")
+    print("CSV file created successfully.", flush = True)
 
 
 if __name__ == "__main__":

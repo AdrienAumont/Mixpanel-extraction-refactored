@@ -100,6 +100,7 @@ class Questionnaire:
         self.properties.setdefault('total_kegel_coach_sessions_length', 0)
         self.properties.setdefault('total_practice_sessions_3d_length', 0)
         self.properties.setdefault('total_practice_sessions_dots_length', 0)
+        self.properties.setdefault('total_game_sessions', 0)
         self.properties.setdefault('medical_urge_score', '')
         self.properties.setdefault('medical_stress_score', '')
         self.properties.setdefault('stress_incontinence_b', '')

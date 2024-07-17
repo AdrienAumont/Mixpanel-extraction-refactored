@@ -18,7 +18,10 @@ def parse_data(data):
         new_quest.reduce_properties()
         identify_quest_and_update_client(new_quest, client)
         client_dict[client.distinct_id] = client
-    return client_dict
+    client_list = list(filter(lambda user: user.has_pa_i(0), client_dict.values()))
+    for client in client_list :
+        client.ui = "UI" if client.has_key_symptom_at_i('medical_score', 0) else "NON UI"
+    return client_list
 
 
 def identify_quest_and_update_client(quest: Questionnaire, client: Client):
@@ -27,7 +30,7 @@ def identify_quest_and_update_client(quest: Questionnaire, client: Client):
         needs_replace = client.quests[i] is None or client.quests[i].properties['total_game_sessions'] < quest.properties['total_game_sessions']
         if game_sessions in RANGES[i] and needs_replace:
             client.quests[i] = quest
-            if i > 1 and client.quests[0]:
+            if i >= 1 and client.quests[0]:
                 client.delta_time_i(i)
 
 

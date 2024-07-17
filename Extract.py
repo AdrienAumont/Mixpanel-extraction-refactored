@@ -2,11 +2,34 @@ from mixpanel_utils import MixpanelUtils
 import json
 import pandas as pd
 from datetime import datetime
+from datetime import timedelta
 API_SECRET = 'e0d9beac86a83795e8e7bd8608ae9e1b'
 API = MixpanelUtils(API_SECRET)
 
 
-def fetch_and_store_data(event_name, start_date, end_date, file_name):
+def get_date_ranges(dates):
+    """Given a sorted list of dates, find all continuous ranges."""
+    if not dates:
+        return []
+
+    ranges = []
+    start_date = dates[0]
+    prev_date = dates[0]
+
+    for date in dates[1:]:
+        if date != prev_date + timedelta(days=1):
+            ranges.append((start_date, prev_date))
+            start_date = date
+        prev_date = date
+
+    ranges.append((start_date, prev_date))
+    return ranges
+
+
+def fetch_and_store_data(event_name, start_date_str, end_date_str, file_name):
+    start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+    end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+
     existing_dates = get_existing_dates(file_name)
     missing_dates = get_missing_dates(start_date, end_date, existing_dates)
 
@@ -14,16 +37,18 @@ def fetch_and_store_data(event_name, start_date, end_date, file_name):
         print("Data for the requested date range is already imported.")
         return
 
-    for date in missing_dates:
-        new_data = get_mixpanel_data(event_name, date, date)
-        append_data_to_file(new_data, file_name)
+    # Sort the missing dates to find continuous ranges
+    missing_dates = sorted(missing_dates)
+    date_ranges = get_date_ranges(missing_dates)
 
+    for start, end in date_ranges:
+        new_data = get_mixpanel_data(event_name, start, end)
+        append_data_to_file(new_data, file_name)
     print("Data has been fetched and stored successfully.")
 
 
 def get_mixpanel_data(event_name, start_date, end_date):
     mputils = MixpanelUtils('e0d9beac86a83795e8e7bd8608ae9e1b', token="64dbf22bfc3728f730b4895b62573650")
-    selector = 'defined (properties["$firmware"])'
 
     query = '''function main() {
                             return Events({
@@ -44,9 +69,7 @@ def parse_mixpanel_time(timestamp):
         # Convert timestamp to datetime object
         dt_object = datetime.fromtimestamp(timestamp_sec)
 
-        # Extract the date in YYYY-MM-DD format
-        date = dt_object.strftime('%Y-%m-%d')
-        return date
+        return dt_object
     except ValueError:
         return None  # Handle invalid timestamps gracefully if needed
 
@@ -60,15 +83,17 @@ def get_existing_dates(file_name):
     try:
         with open(file_name, 'r') as f:
             data = json.load(f)
-            existing_dates = [parse_mixpanel_time(item['time']) for item in data]
+            existing_dates = [parse_mixpanel_time(item['time']).date() for item in data]
             return set(existing_dates)
     except FileNotFoundError:
         return set()
 
 
 def get_missing_dates(start_date, end_date, existing_dates):
-    requested_dates = pd.date_range(start=start_date, end=end_date).strftime('%Y-%m-%d').tolist()
-    return [date for date in requested_dates if date not in existing_dates]
+    requested_dates = pd.date_range(start=start_date, end=end_date).tolist()
+    requested_dates = [date.date() for date in requested_dates]
+    existing_dates_set = set(existing_dates)
+    return [date for date in requested_dates if date not in existing_dates_set]
 
 
 def append_data_to_file(new_data, file_name):
@@ -93,7 +118,8 @@ def get_data_from_file(file_name, start_date, end_date):
 
         filtered_data = [
             item for item in data
-            if start_date_obj <= datetime.strptime(parse_mixpanel_time(item['time']), '%Y-%m-%d') <= end_date_obj
+            if start_date_obj <= datetime.strptime(parse_mixpanel_time(item['time']).strftime('%Y-%m-%d'), '%Y-%m-%d') <= end_date_obj
+
         ]
 
         return filtered_data
