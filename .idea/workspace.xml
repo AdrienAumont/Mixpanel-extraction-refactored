@@ -4,11 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2572cf0a-53b0-42dd-9751-2c4a693bf108" name="Changes" comment="Data extraction is now made to a file, and not redone on dates that were already extracted, rest of changes made to accommodate extraction to file">
-      <change afterPath="$PROJECT_DIR$/Analysis.py" afterDir="false" />
+    <list default="true" id="2572cf0a-53b0-42dd-9751-2c4a693bf108" name="Changes" comment="data Analysis is debugged and everything should work fine, few differences in stats more clients imported than Louise code (to investigate)">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Analysis.py" beforeDir="false" afterPath="$PROJECT_DIR$/Analysis.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Client_Statistics_obj.py" beforeDir="false" afterPath="$PROJECT_DIR$/Client_Statistics_obj.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Client_obj.py" beforeDir="false" afterPath="$PROJECT_DIR$/Client_obj.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Data_preProcessing.py" beforeDir="false" afterPath="$PROJECT_DIR$/Data_preProcessing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Extract.py" beforeDir="false" afterPath="$PROJECT_DIR$/Extract.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Wellbeing_questionaire.py" beforeDir="false" afterPath="$PROJECT_DIR$/Wellbeing_questionaire.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
@@ -58,12 +60,15 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Python.Analysis.executor": "Debug",
     "Python.Client_obj.executor": "Run",
     "Python.Csv_writter.executor": "Run",
+    "Python.Extract.executor": "Run",
     "Python.Wellbeing_questionaire.executor": "Run",
     "Python.extraction_brute_force.executor": "Run",
     "Python.main.executor": "Run",
     "Python.table_viewer.executor": "Run",
+    "Python.test.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "main",
     "last_opened_file_path": "/Users/adrienaumont/Desktop/extraction Mixpanel refactor/extraction refactored",
@@ -141,13 +146,31 @@
       <option name="project" value="LOCAL" />
       <updated>1720709788928</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="data Analysis is written but untested, new classes are made to facilitate the analysis">
+      <option name="closed" value="true" />
+      <created>1721120605871</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1721120605871</updated>
+    </task>
+    <task id="LOCAL-00004" summary="data Analysis is debugged and everything should work fine, few differences in stats more clients imported than Louise code (to investigate)">
+      <option name="closed" value="true" />
+      <created>1721220341588</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1721220341589</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Data extraction from mixpanel done with variable dates and organised in a dictionary of Clients and in Questionaire abstraction" />
     <MESSAGE value="Data extraction is now made to a file, and not redone on dates that were already extracted, rest of changes made to accommodate extraction to file" />
-    <option name="LAST_COMMIT_MESSAGE" value="Data extraction is now made to a file, and not redone on dates that were already extracted, rest of changes made to accommodate extraction to file" />
+    <MESSAGE value="data Analysis is written but untested, new classes are made to facilitate the analysis" />
+    <MESSAGE value="data Analysis is debugged and everything should work fine, few differences in stats more clients imported than Louise code (to investigate)" />
+    <option name="LAST_COMMIT_MESSAGE" value="data Analysis is debugged and everything should work fine, few differences in stats more clients imported than Louise code (to investigate)" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

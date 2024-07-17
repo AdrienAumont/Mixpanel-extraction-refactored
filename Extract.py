@@ -8,7 +8,11 @@ API = MixpanelUtils(API_SECRET)
 
 
 def get_date_ranges(dates):
-    """Given a sorted list of dates, find all continuous ranges."""
+    """
+    from a list of dates computes the largest ranges of dates possible to cover the whole list
+    :param dates : list[dates] : list of missing dates
+    :return: list of ranges of dates
+    """
     if not dates:
         return []
 
@@ -27,6 +31,13 @@ def get_date_ranges(dates):
 
 
 def fetch_and_store_data(event_name, start_date_str, end_date_str, file_name):
+    """
+    imports from mixpanel the given event data from the given names into a file with the given name
+    :param event_name : str: name of the mixpanel event
+    :param start_date_str: str: import from this date
+    :param end_date_str: str: import to this date
+    :param file_name: str: where to save raw data
+    """
     start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
     end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
 
@@ -48,6 +59,13 @@ def fetch_and_store_data(event_name, start_date_str, end_date_str, file_name):
 
 
 def get_mixpanel_data(event_name, start_date, end_date):
+    """
+    uses mix panel api to export from the website
+    :param event_name: the event to export
+    :param start_date: export from this date
+    :param end_date: export from this date
+    :return: the imported data
+    """
     mputils = MixpanelUtils('e0d9beac86a83795e8e7bd8608ae9e1b', token="64dbf22bfc3728f730b4895b62573650")
 
     query = '''function main() {
@@ -62,6 +80,11 @@ def get_mixpanel_data(event_name, start_date, end_date):
 
 
 def parse_mixpanel_time(timestamp):
+    """
+    transform a timestamp into a datetime object
+    :param timestamp: int : timestamp
+    :return: datetime object
+    """
     try:
         # Convert milliseconds to seconds (required by datetime.fromtimestamp)
         timestamp_sec = timestamp / 1000.0
@@ -75,11 +98,21 @@ def parse_mixpanel_time(timestamp):
 
 
 def store_data_to_file(data, file_name):
+    """
+    store given data in a file with given name
+    :param data: data to store
+    :param file_name: str: name of the created file
+    """
     with open(file_name, 'w') as f:
         json.dump(data, f)
 
 
 def get_existing_dates(file_name):
+    """
+    Get all already imported date from the raw data
+    :param file_name: str: the name of the file containing the raw data
+    :return: set of already imported dates
+    """
     try:
         with open(file_name, 'r') as f:
             data = json.load(f)
@@ -90,6 +123,13 @@ def get_existing_dates(file_name):
 
 
 def get_missing_dates(start_date, end_date, existing_dates):
+    """
+    Get all dates that are still to be imported
+    :param start_date: datetime obj: start of the date range
+    :param end_date: datetime obj: end of the date range
+    :param existing_dates: set(datetime obj): the set of already imported dates
+    :return: a list of the dates that are yet to be imported
+    """
     requested_dates = pd.date_range(start=start_date, end=end_date).tolist()
     requested_dates = [date.date() for date in requested_dates]
     existing_dates_set = set(existing_dates)
@@ -97,6 +137,11 @@ def get_missing_dates(start_date, end_date, existing_dates):
 
 
 def append_data_to_file(new_data, file_name):
+    """
+    appends data at the end of a file, used when adding data to raw data
+    :param new_data: the raw data to append
+    :param file_name: str: the name of the file
+    """
     try:
         with open(file_name, 'r+') as f:
             data = json.load(f)
@@ -108,6 +153,13 @@ def append_data_to_file(new_data, file_name):
 
 
 def get_data_from_file(file_name, start_date, end_date):
+    """
+    Gets data from the given file from a certain date to a certain date
+    :param file_name: str: the name of the file
+    :param start_date: str: the start of the date range
+    :param end_date: str: the end of the date range
+    :return: the data obtained from the file
+    """
     try:
         with open(file_name, 'r') as f:
             data = json.load(f)

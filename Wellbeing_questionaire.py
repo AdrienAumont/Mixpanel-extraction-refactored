@@ -2,7 +2,7 @@
 from enum import Enum
 
 
-# this enumeration is used to select what properties to extract from mixpanel
+# this enumeration is used to select what properties to show on the output csv file
 class KeyProperties(Enum):
     DISTINCT_ID = "distinct_id"
     TOTAL_GAME_SESSIONS = "total_game_sessions"
@@ -84,13 +84,18 @@ class KeyProperties(Enum):
 
 
 class Questionnaire:
+    """
+    This is a class to represent a single Wellness assessment/Pelvic Assessment questionnaire
+
+    Parameters:
+    distinct_id (str): who took the Wellness assessment.
+    time (int): When it was taken as a timestamp in millisecond since the Unix epoch.
+    properties (dict): the different attributes the of the test
+    """
     def __init__(self,
-                 name: str = 'Pelvic Assessment Passed',
                  distinct_id: str = '',
                  time: int = 0,
                  properties: dict = None):
-
-        self.name = name
         self.distinct_id = distinct_id
         self.time = time
         self.properties = properties if properties else {}
@@ -164,29 +169,30 @@ class Questionnaire:
         self.properties.setdefault('kpi_strength', '')
         self.properties.setdefault('kpi_contraction_quality', '')
 
-    def to_dict(self):
-        return {
-            'name': self.name,
-            'distinct_id': self.distinct_id,
-            'labels': self.labels,
-            'time': self.time,
-            'sampling_factor': self.sampling_factor,
-            'dataset': self.dataset,
-            'properties': self.properties
-        }
-
     def flatten(self):
+        """
+        Takes the attributes of the class and returns a flat dictionary
+
+        returns:
+        dict: attributes and properties of the class
+        """
         new_dict = self.__dict__
         prop = new_dict.pop('properties')
         new_dict.update(prop)
         return new_dict
 
     def undef_to_default(self):
+        """
+        Takes all values in properties that are "undefined" and sets them to default value 0
+        """
         for key, value in self.properties.items():
             if value == 'undefined':
                 self.properties[key] = 0
 
     def reduce_properties(self):
+        """
+        Computes the different properties that require computation from other raw properties and add them to properties
+        """
         self.undef_to_default()
         self.properties['medical_score'] = (
                 self.properties['medical_urge_1'] + self.properties['medical_urge_2'] + self.properties['medical_urge_3']
@@ -207,6 +213,12 @@ class Questionnaire:
         self.properties['sex_result'] = self.calc_sex_result()
 
     def calc_sex_result(self):
+        """
+        Computes sex_result attribute (helper function for reduce properties)
+
+        returns:
+        int: sex_result
+        """
         values = 0
         divisor = 0
         if self.properties['sexuality_1'] == 'undefined':
