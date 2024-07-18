@@ -23,6 +23,7 @@ def analyse_pa1(pa_dict, cs):
     :param pa_dict: the dict to update passed by reference
     :param cs: the ClientStatistics object to perform the calculations
     """
+    pa_dict['PA1 # respondents'] = cs.count_matches(lambda client: client.has_pa_i(0))
     pa_dict['PA1 # with symptoms'] = cs.count_matches(lambda client: client.has_key_symptom_at_i('medical_score', 0))
 
     pa_dict['PA1 % with symptoms'] = (
