@@ -193,10 +193,10 @@ def analyse_non_specific_pa(i, cs, pa_dict):
         lambda client: client.get_num_key_at_i('subjective', 0)))
 
     pa_dict[f'pa{i + 1} Mean subjective delta '] = "{:.2f}".format(cs.mean_of_vals(
-        lambda client: client.get_num_key_at_i('subjective', i)))
+        lambda client: client.delta_pa_i('subjective', i)))
 
     pa_dict[f'pa{i + 1} Stdv subjective delta'] = "{:.2f}".format(cs.pstdv_of_vals(
-        lambda client: client.get_num_key_at_i('subjective', i)))
+        lambda client: client.delta_pa_i('subjective', i)))
 
     pa_dict[f'pa{i + 1} UI % better sexual wellbeing'] = "{:.2f}".format(cs.ratio_of_matches(
         lambda client: client.has_key_symptom_at_i('medical_score', 0) and client.got_better_at_i('sex_result', i),
