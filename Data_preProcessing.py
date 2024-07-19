@@ -2,27 +2,24 @@ from mixpanel_utils import MixpanelUtils
 from Client_obj import Client
 from Wellbeing_questionaire import Questionnaire, KeyProperties
 from Client_obj import RANGES
+client_dict = {}
 
 
-def parse_data(data):
+def parse_data(dataframe):
     """
-    transform raw exported from mixpanel data into a list of unique Clients each with his own list of Questionnaire
-    :param data: raw data
+    Transform raw data exported from Mixpanel into a list of unique Clients each with their own list of Questionnaires.
+    :param dataframe: DataFrame containing the raw data
     :return: list of unique clients
     """
-    client_dict = {}
-    for i in range(len(data)):
-        if not data[i].get('distinct_id') in client_dict:
-            client = Client(data[i].get('distinct_id'), [])
-        else:
-            client = client_dict[data[i]['distinct_id']]
-        new_quest = parse_quest(data[i])
-        new_quest.reduce_properties()
-        identify_quest_and_update_client(new_quest, client)
-        client_dict[client.distinct_id] = client
+    print('processing rows')
+    # Apply the process_row function to each row
+    dataframe.apply(process_row, axis=1)
+    print('done')
     client_list = list(filter(lambda user: user.has_pa_i(0), client_dict.values()))
-    for client in client_list :
+
+    for client in client_list:
         client.ui = "UI" if client.has_key_symptom_at_i('medical_score', 0) else "NON UI"
+
     return client_list
 
 
@@ -41,6 +38,23 @@ def identify_quest_and_update_client(quest: Questionnaire, client: Client):
                 client.delta_time_i(i)
 
 
+def process_row(row):
+    """
+    Process a single row to create or update a client with the questionnaire information.
+    """
+    distinct_id = row['distinct_id']
+    if distinct_id not in client_dict:
+        client = Client(distinct_id, [])
+    else:
+        client = client_dict[distinct_id]
+
+    new_quest = parse_quest(row)
+    new_quest.reduce_properties()
+    identify_quest_and_update_client(new_quest, client)
+
+    client_dict[client.distinct_id] = client
+
+
 def parse_quest(one_line_data: dict):
     """
     Takes one line of raw data and creates a questionnaire from it using the enumeration given in
@@ -50,8 +64,8 @@ def parse_quest(one_line_data: dict):
     """
     new_properties = {}
     for key in KeyProperties:
-        if key.value in one_line_data['properties']:
-            new_properties[key.value] = one_line_data['properties'][key.value]
+        if key.value in one_line_data:
+            new_properties[key.value] = one_line_data[key.value]
     return Questionnaire(one_line_data['distinct_id'], one_line_data['time'], new_properties)
 
 
