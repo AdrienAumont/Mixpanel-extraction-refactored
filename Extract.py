@@ -3,8 +3,9 @@ import json
 import pandas as pd
 from datetime import datetime
 from datetime import timedelta
+import To_Pickle
 API_SECRET = 'e0d9beac86a83795e8e7bd8608ae9e1b'
-API = MixpanelUtils(API_SECRET)
+API = "64dbf22bfc3728f730b4895b62573650"
 
 
 def get_date_ranges(dates):
@@ -40,8 +41,9 @@ def fetch_and_store_data(event_name, start_date_str, end_date_str, file_name):
     """
     start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
     end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
-
+    print("getting dates")
     existing_dates = get_existing_dates(file_name)
+    print("got dates")
     missing_dates = get_missing_dates(start_date, end_date, existing_dates)
 
     if not missing_dates:
@@ -66,7 +68,7 @@ def get_mixpanel_data(event_name, start_date, end_date):
     :param end_date: export from this date
     :return: the imported data
     """
-    mputils = MixpanelUtils('e0d9beac86a83795e8e7bd8608ae9e1b', token="64dbf22bfc3728f730b4895b62573650")
+    mputils = MixpanelUtils(API_SECRET, token=API)
 
     query = '''function main() {
                             return Events({
@@ -114,10 +116,11 @@ def get_existing_dates(file_name):
     :return: set of already imported dates
     """
     try:
-        with open(file_name, 'r') as f:
-            data = json.load(f)
-            existing_dates = [parse_mixpanel_time(item['time']).date() for item in data]
-            return set(existing_dates)
+        print("reading")
+        dataframe = pd.read_pickle(file_name)
+        print("read dates")
+        date_list = dataframe['time'].apply(lambda x: parse_mixpanel_time(x).date()).tolist()
+        return set(date_list)
     except FileNotFoundError:
         return set()
 
@@ -143,46 +146,46 @@ def append_data_to_file(new_data, file_name):
     :param file_name: str: the name of the file
     """
     try:
-        with open(file_name, 'r+') as f:
-            data = json.load(f)
-            data.extend(new_data)
-            f.seek(0)
-            json.dump(data, f)
+        raw_dataframe = pd.read_pickle(file_name)
+        new_dataframe = To_Pickle.transform_data(new_data)
+        raw_dataframe.append(new_dataframe, ignore_index=True)
     except FileNotFoundError:
         store_data_to_file(new_data, file_name)
 
 
 def get_data_from_file(file_name, start_date, end_date):
     """
-    Gets data from the given file from a certain date to a certain date
+    Gets data from the given file from a certain date to a certain date.
     :param file_name: str: the name of the file
     :param start_date: str: the start of the date range
     :param end_date: str: the end of the date range
-    :return: the data obtained from the file
+    :return: DataFrame: the data obtained from the file within the date range
     """
     try:
-        with open(file_name, 'r') as f:
-            data = json.load(f)
+        print("reading")
+        # Load the DataFrame from the pickle file
+        dataframe = pd.read_pickle(file_name)
+        print("done")
 
         # Convert string dates to datetime objects for comparison
         start_date_obj = datetime.strptime(start_date, '%Y-%m-%d')
         end_date_obj = datetime.strptime(end_date, '%Y-%m-%d')
 
-        filtered_data = [
-            item for item in data
-            if start_date_obj <= datetime.strptime(parse_mixpanel_time(item['time']).strftime('%Y-%m-%d'), '%Y-%m-%d') <= end_date_obj
+        # Convert 'time' column to datetime if it's not already in datetime format
+        if not pd.api.types.is_datetime64_any_dtype(dataframe['time']):
+            dataframe['time'] = pd.to_datetime(dataframe['time'], unit='ms')
 
-        ]
+        # Filter the DataFrame based on the date range
+        filtered_data = dataframe[
+            (dataframe['time'] >= start_date_obj) &
+            (dataframe['time'] <= end_date_obj)
+            ]
 
+        print("data got gotten")
         return filtered_data
-
-    except FileNotFoundError:
-        print("Data file not found.")
-        return []
-
     except Exception as e:
         print(f"An error occurred: {e}")
-        return []
+        return None
 
 
 

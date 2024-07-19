@@ -2,7 +2,7 @@ import numbers
 from typing import Callable, List
 from Wellbeing_questionaire import Questionnaire as Quest
 # this is the list of ranges that define the ranges of games played for PA1, PA2 ...
-RANGES = [range(0, 6), range(40, 61), range(90, 121)]
+RANGES = [range(0, 6), range(40, 61), range(90, 121), range(300, 2000)]
 
 
 class Client:
@@ -148,7 +148,7 @@ class Client:
         :return: float : the time between assessment in days
         """
         if self.has_pa_i(0) and self.has_pa_i(i):
-            self.quests[i].properties['days_since_PA1'] = (self.quests[i].time - self.quests[0].time) / 86400000
+            self.quests[i].properties['days_since_PA1'] = (self.quests[i].time.value - self.quests[0].time.value) / (10**9 * 60 * 60 * 24)
             return self.quests[i].properties['days_since_PA1']
 
     def delta_pa_i(self, key, i):

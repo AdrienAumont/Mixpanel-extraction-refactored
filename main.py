@@ -14,12 +14,21 @@ def main():
     4. analyses the values to give meaningful statistics on the requested time period
     5. writes the analysis to a csv file
     """
-    Extract.fetch_and_store_data("Pelvic Assessment Passed", "2022-04-22", "2022-05-24", "raw_data")
-    raw_data = Extract.get_data_from_file("raw_data", '2022-04-22', '2022-05-24')
+    Extract.fetch_and_store_data("Pelvic Assessment Passed", "2023-04-22", "2023-05-22", "dataframe.pkl")
+    raw_data = Extract.get_data_from_file("dataframe.pkl", '2023-04-22', '2023-10-22')
+    print("parsing")
     list_of_clients = dapa.parse_data(raw_data)
+    print("done")
+    # pa2_list = extract_game_brute_force.get_client_list(list_of_clients)
+    # game_data = extract_game_brute_force.get_mixpanel_data("Game Session Ended", "2023-04-22", "2023-10-24", pa2_list)
+    # Extract.append_data_to_file(game_data, 'game_test_6_month')
     pre_processed_data = to_list_of_dict(list_of_clients.copy())
+    print("writing")
     write_to_csv(pre_processed_data, 'output.csv')
+    print("done")
+    print("analyzing")
     analysis = calc_stats(list_of_clients)
+    print("done")
     analysis_list = dict_to_list_of_tuples(analysis)
     write_to_csv(analysis_list, 'analysis.csv')
 
@@ -68,9 +77,9 @@ def write_to_csv(pre_processed_data, name):
     """
     df = pd.DataFrame(pre_processed_data)
     # Write DataFrame to CSV
-    df.to_csv(name, index=False)
+    df.to_csv(name, index=True)
 
-    print("CSV file created successfully.", flush = True)
+    print("CSV file created successfully.")
 
 
 if __name__ == "__main__":

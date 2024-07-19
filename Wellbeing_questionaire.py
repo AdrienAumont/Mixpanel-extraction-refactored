@@ -193,7 +193,12 @@ class Questionnaire:
         """
         Computes the different properties that require computation from other raw properties and add them to properties
         """
+        self.properties['sex_result'] = self.calc_sex_result()
         self.undef_to_default()
+        if self.properties['total_kegel_coach_sessions'] > 0:
+            self.properties['kegel_coach_done'] = 'YES'
+        elif self.properties['total_kegel_coach_sessions'] == 0:
+            self.properties['kegel_coach_done'] = 'NO'
         self.properties['medical_score'] = (
                 self.properties['medical_urge_1'] + self.properties['medical_urge_2'] + self.properties['medical_urge_3']
                 + self.properties['medical_urge_4'] + self.properties['medical_urge_5'] + self.properties[
@@ -210,7 +215,7 @@ class Questionnaire:
         self.properties['medical_prolapse_symptoms'] = (
                 self.properties['medical_prolapse_1'] + self.properties['medical_prolapse_2']
                 + self.properties['medical_prolapse_3'])
-        self.properties['sex_result'] = self.calc_sex_result()
+
 
     def calc_sex_result(self):
         """
